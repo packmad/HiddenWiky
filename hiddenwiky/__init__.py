@@ -3,15 +3,6 @@ from urllib.parse import urlparse
 import requests
 from lxml import html
 
-tor_socks = "socks5://127.0.0.1:9050"
-
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Connection': 'keep-alive',
-}
-
 
 class OnionLink:
     def __init__(self, url, name):
@@ -21,6 +12,15 @@ class OnionLink:
     def __str__(self):
         return "{} {}".format(self.url, self.name)
 
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Connection': 'keep-alive',
+}
+
+tor_socks = "socks5://127.0.0.1:9050"
 
 if __name__ == "__main__":
     onion_links = []

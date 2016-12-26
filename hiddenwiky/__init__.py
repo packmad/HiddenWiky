@@ -12,31 +12,43 @@ headers = {
     'Connection': 'keep-alive',
 }
 
+
+class OnionLink:
+    def __init__(self, url, name):
+        self.url = url
+        self.name = name
+
+    def __str__(self):
+        return "{} {}".format(self.url, self.name)
+
+
 if __name__ == "__main__":
-    onion_urls = []
+    onion_links = []
     try:
         resp = requests.get('http://zqktlwi4fecvo6ri.onion/wiki/index.php/Main_Page',
                             proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
         webpage = html.fromstring(resp.content)
         hrefs = webpage.xpath('//a/@href')
-        onion_urls = []
+        onion_links = []
         for ref in hrefs:
             tmp_url = urlparse(ref)
             if tmp_url.scheme in ["http", "https"] and tmp_url.hostname.endswith(".onion"):  # is onion link
-                onion_urls.append(ref)
+                desc = webpage.xpath("//a[@href='{}']/text()".format(ref))
+                if desc:
+                    onion_links.append(OnionLink(ref, desc[0]))
     except requests.exceptions.ConnectionError:
         print("Wiki connection failed")
 
-    if onion_urls:
-        print("Wiki scraping ended")
-        active_onion_urls = []
-        for onion_url in onion_urls:
+    if onion_links:
+        print("Active links:")
+        active_onion_links = []
+        for onion_link in onion_links:
             try:
-                resp = requests.get(onion_url, proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
+                resp = requests.get(onion_link.url, proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
                 if resp.status_code == 200:
-                    active_onion_urls.append(onion_url)
-                    print(onion_url)
+                    active_onion_links.append(onion_link)
+                    print(onion_link)
             except requests.exceptions.ConnectionError:
                 pass
-        if active_onion_urls:
+        if active_onion_links:
             pass  # TODO

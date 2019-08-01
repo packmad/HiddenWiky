@@ -20,7 +20,7 @@ headers = {
     'Connection': 'keep-alive',
 }
 
-tor_socks = "socks5://127.0.0.1:9050"
+tor_socks = "socks5h://127.0.0.1:9050"
 
 if __name__ == "__main__":
     onion_links = []
@@ -32,12 +32,12 @@ if __name__ == "__main__":
         onion_links = []
         for ref in hrefs:
             tmp_url = urlparse(ref)
-            if tmp_url.scheme in ["http", "https"] and tmp_url.hostname.endswith(".onion"):  # is onion link
+            if tmp_url.scheme in ["http", "https"] and tmp_url.hostname.endswith(".onion"):  # it is an onion link
                 desc = webpage.xpath("//a[@href='{}']/text()".format(ref))
                 if desc:
                     onion_links.append(OnionLink(ref, desc[0]))
-    except requests.exceptions.ConnectionError:
-        print("Wiki connection failed")
+    except requests.exceptions.ConnectionError as e:
+        print("Wiki connection failed: ", str(e))
 
     if onion_links:
         print("Active links:")

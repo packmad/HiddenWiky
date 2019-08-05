@@ -1,3 +1,4 @@
+from json import JSONEncoder
 from lxml import html
 from multiprocessing.pool import Pool
 from typing import Optional
@@ -8,6 +9,11 @@ import os
 import requests
 
 
+class JEnc(JSONEncoder):
+    def default(self, o):
+        return o.__dict__
+
+
 class OnionLink:
     def __init__(self, url, name, desc):
         self.url = url
@@ -15,7 +21,7 @@ class OnionLink:
         self.desc = desc
 
     def __str__(self):
-        return json.dumps(self.__dict__)
+        return json.dumps(self, cls=JEnc)
 
 
 headers = {
@@ -33,9 +39,9 @@ def check_link(url: str, title: str, desc: str) -> Optional[OnionLink]:
         resp = requests.get(url, proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
         if resp.status_code == 200:
             ol = OnionLink(url, title, desc)
-            print(ol)
+            # print(ol)
             return ol
-    except requests.exceptions.ConnectionError:
+    except Exception:
         pass
     return None
 
@@ -63,3 +69,5 @@ if __name__ == "__main__":
     if onion_links:
         with Pool(processes=os.cpu_count()) as pool:
             active_onion_links = pool.starmap(check_link, onion_links)
+            active_onion_links = list(filter(None, active_onion_links))
+            print(json.dumps(active_onion_links, cls=JEnc))

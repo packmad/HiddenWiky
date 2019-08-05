@@ -1,5 +1,5 @@
 # HiddenWiky
-Hidden wiki is a simple active link scraper of the famous website "[The Hidden Wiki](http://zqktlwi4fecvo6ri.onion/wiki/index.php/Main_Page)"
+Hidden wiki is a simple active link scraper for "[The Hidden Wiki](http://zqktlwi4fecvo6ri.onion/wiki/index.php/Main_Page)"
 
 No Python packages needed!
 

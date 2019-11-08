@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import json
 import os
 import requests
+import time
 
 
 class JEnc(JSONEncoder):
@@ -32,6 +33,7 @@ headers = {
 }
 
 tor_socks = "socks5h://127.0.0.1:9050"
+hidden_wiki_url = "http://zqktlwiuavvvqqt4ybvgvi7tyo4hjl5xgfuvpdf6otjiycgwqbym2qad.onion/wiki/index.php/Main_Page"
 
 
 def check_link(url: str, title: str, desc: str) -> Optional[OnionLink]:
@@ -39,7 +41,7 @@ def check_link(url: str, title: str, desc: str) -> Optional[OnionLink]:
         resp = requests.get(url, proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
         if resp.status_code == 200:
             ol = OnionLink(url, title, desc)
-            # print(ol)
+            print(ol)
             return ol
     except Exception:
         pass
@@ -49,8 +51,7 @@ def check_link(url: str, title: str, desc: str) -> Optional[OnionLink]:
 if __name__ == "__main__":
     onion_links = []
     try:
-        resp = requests.get('http://zqktlwi4fecvo6ri.onion/wiki/index.php/Main_Page',
-                            proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
+        resp = requests.get(hidden_wiki_url, proxies=dict(http=tor_socks, https=tor_socks), headers=headers)
         webpage = html.fromstring(resp.content)
         hrefs = webpage.xpath('//a/@href')
         onion_links = set()
@@ -67,7 +68,11 @@ if __name__ == "__main__":
         print("Wiki connection failed! Exception: ", str(e))
 
     if onion_links:
+        print("> {} links collected".format(len(onion_links)))
         with Pool(processes=os.cpu_count()) as pool:
             active_onion_links = pool.starmap(check_link, onion_links)
             active_onion_links = list(filter(None, active_onion_links))
-            print(json.dumps(active_onion_links, cls=JEnc))
+            with open("{}.json".format(time.strftime("%Y-%m-%d_%H:%M")), "w", encoding="utf-8") as out_file:
+               json.dump(active_onion_links, out_file, cls=JEnc)
+    else:
+        print("> No links collected :(")
